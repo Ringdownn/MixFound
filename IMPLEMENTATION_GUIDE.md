@@ -25,7 +25,60 @@
 *   **中间件**: Canal (Binlog 同步)
 *   **架构**: 微服务 + 插件化，各模块松耦合。
 
-## 1. 核心架构设计
+## 1. 核心架构设计 (Core Architecture Design)
+
+本项目采用**多语言、事件驱动、多级缓存**的混合架构，确保搜索的实时性、准确性与高性能。
+
+### 1.1 系统架构图
+```text
+[ 用户端 ]
+    | (HTTP REST)
+    v
+[ 搜索服务层 (Go / Gin) ] <------------> [ 翻译服务 (Go / Redis / MySQL) ]
+    | (本地调用)                                  | (外部调用)
+    |                                             v
+    +---> [ 搜索引擎内核 (LevelDB) ]         [ 外部翻译 API ]
+    |           (倒排/正排索引)
+    |
+[ 数据同步层 (Go / Canal) ] <------------> [ AI 打标服务 (Python / CLIP) ]
+    | (监听 Binlog)                               | (图像识别)
+    v                                             v
+[ 权威数据库 (MySQL) ]                       [ 图像存储 (OSS/Local) ]
+```
+```text
+[ MySQL ] --(Binlog)--> [ Canal Server ]
+|
+v (TCP/Kafka)
+[ Go Sync Consumer ] <------------------ [ AI Tagging Agent (Python) ]
+|        (调用打标 & 翻译)                   (CLIP Model)
+v
+[ Go Search Engine ] <----(本地调用)----> [ LevelDB Storage ]
+|                                    (倒排索引/正排数据)
+v
+[ Client API (REST) ]
+```
+### 1.2 核心组件说明
+*   **Search Engine (Go)**: 采用高性能 Go 编写，负责接收用户请求、查询扩展、执行倒排索引检索、聚合结果及高亮。
+*   **AI Tagging Agent (Python)**: 运行 OpenAI CLIP 模型，将图像转换为高维特征向量并与标签库匹配，生成语义标签。
+*   **Canal Client**: 监听 MySQL 的二进制日志（Binlog），捕获 `INSERT/UPDATE/DELETE` 事件，实现搜索数据的近实时同步。
+*   **Translator Service**: 采用三层缓存策略（Map/Redis/MySQL），将中文分词结果映射为对应的英文语义词。
+*   **LevelDB**: 高性能嵌入式 KV 存储，用于持久化存储索引数据。
+
+### 1.3 核心数据流转 (Data Flow)
+
+#### 1.3.1 索引构建流 (Indexing Flow)
+1.  **数据变更**: 商品在 MySQL 中被创建或修改。
+2.  **事件捕获**: Canal 捕获 Binlog，Go Sync Consumer 接收到 `RowEvent`。
+3.  **AI 处理**: 如果有图片 URL，Sync Consumer 调用 AI 打标服务获取英文标签。
+4.  **翻译回填**: 系统利用字典将英文标签翻译为中文，作为搜索词补充。
+5.  **索引写入**: 将 `标题 + 描述 + 标签` 写入 LevelDB 倒排索引。
+
+#### 1.3.2 搜索查询流 (Search Flow)
+1.  **用户输入**: 用户搜索中文关键词。
+2.  **查询扩展**: 调用翻译服务，将关键词（如“红色”）扩展为中英混合词（“红色 red”）。
+3.  **并发检索**: 并发在 LevelDB 多个分片中查找命中的文档 ID。
+4.  **打分排序**: 根据命中词频（TF）、匹配精度、业务权重（销量等）进行综合打分。
+5.  **详情提取**: 根据 ID 从正排索引中提取 JSON 详情并返回给用户。
 
 ## 2. 模块详细设计
 
