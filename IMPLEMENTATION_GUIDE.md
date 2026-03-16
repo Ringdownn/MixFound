@@ -47,14 +47,14 @@
 ```
 ```text
 [ MySQL ] --(Binlog)--> [ Canal Server ]
-|
-v (TCP/Kafka)
+                            |
+                            v (TCP/Kafka)
 [ Go Sync Consumer ] <------------------ [ AI Tagging Agent (Python) ]
-|        (调用打标 & 翻译)                   (CLIP Model)
-v
+          |        (调用打标 & 翻译)                   (CLIP Model)
+          v
 [ Go Search Engine ] <----(本地调用)----> [ LevelDB Storage ]
-|                                    (倒排索引/正排数据)
-v
+          |                                    (倒排索引/正排数据)
+          v
 [ Client API (REST) ]
 ```
 ### 1.2 核心组件说明
