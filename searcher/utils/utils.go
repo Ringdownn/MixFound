@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"regexp"
 	"time"
 )
@@ -121,7 +124,7 @@ func Uint32Comparator(a, b interface{}) int {
 	return 0
 }
 
-func Uint32ToBtye(u uint32) []byte {
+func Uint32ToByte(u uint32) []byte {
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, u)
 	return b
@@ -139,4 +142,62 @@ func RemovePunctuation(s string) string {
 func RemoveSpace(s string) string {
 	reg := regexp.MustCompile(`\s+`)
 	return reg.ReplaceAllString(s, "")
+}
+
+// DirSize 计算占用磁盘空间大小
+func DirSize(path string) int64 {
+	var size int64
+	filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+
+	return size
+}
+
+func ReleaseAssets(file fs.File, out string) {
+	if file == nil {
+		return
+	}
+
+	if out == "" {
+		panic("out is empty")
+	}
+
+	//判断out文件是否存在
+	if _, err := os.Stat(out); os.IsNotExist(err) {
+		//读取文件信息
+		fileInfo, err := file.Stat()
+		if err != nil {
+			panic(err)
+		}
+		buffer := make([]byte, fileInfo.Size())
+		_, err = file.Read(buffer)
+		if err != nil {
+			panic(err)
+		}
+
+		// 读取输出文件目录
+		outDir := filepath.Dir(out)
+		err = os.MkdirAll(outDir, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+
+		//创建文件
+		outFile, _ := os.Create(out)
+		defer func(outFile *os.File) {
+			err := outFile.Close()
+			if err != nil {
+				panic(err)
+			}
+		}(outFile)
+
+		err = os.WriteFile(out, buffer, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
