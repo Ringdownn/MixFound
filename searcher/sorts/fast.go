@@ -56,7 +56,7 @@ func (s Uint32Slice) Swap(i, j int) {
 type FastSort struct {
 	sync.Mutex
 	IsDebug bool
-	data    []model.SliceItem //存储文档的Id和评分
+	data    []model.SliceItem //存储文档的Id和评分(无重复)
 	temps   []uint32          //临时存储待处理的文档ID
 	count   int               //总数
 	Order   string            //排序方式
@@ -67,7 +67,7 @@ func (f *FastSort) Add(ids *[]uint32) {
 	f.temps = append(f.temps, *ids...)
 }
 
-// 在以排序的data中二分查找指定的ID
+// 在已排序的data中二分查找指定的ID
 func (f *FastSort) find(target *uint32) (bool, int) {
 	l := 0
 	r := f.count - 1
@@ -98,6 +98,26 @@ func (f *FastSort) Sort() {
 	}
 }
 
-func (f *FastSort) Process() {}
+func (f *FastSort) Process() {
+	f.Sort()
 
-func (f *FastSort) GetAll(result *[]model.SliceItem) {}
+	//计算重复
+	for _, temp := range f.temps {
+		if found, index := f.find(&temp); found {
+			f.data[index].Score += 1 //计算重复得分
+		} else {
+			f.data = append(f.data, model.SliceItem{
+				Id:    temp,
+				Score: 1,
+			})
+			f.count++
+		}
+	}
+
+	//对分数进行排序
+	sort.Sort(sort.Reverse(ScoreSlice(f.data)))
+}
+
+func (f *FastSort) GetAll(result *[]model.SliceItem, start int, end int) {
+	*result = f.data[start:end]
+}
