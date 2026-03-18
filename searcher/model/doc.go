@@ -1,21 +1,23 @@
 package model
 
+// 索引储存
 type IndexDoc struct {
 	Id       uint32                 `json:"id,omitempty"`
 	Text     string                 `json:"text,omitempty"`
 	Document map[string]interface{} `json:"document,omitempty"`
 }
 
+// 索引文件存储
 type StorageIndexDoc struct {
 	*IndexDoc
-	Keys []string `json:"keys,omitempty"`
+	Keys []string `json:"keys,omitempty"` //分词
 }
 
 type ResponseDoc struct {
 	IndexDoc
 	OriginalText string   `json:"originalText,omitempty"`
-	Score        int      `json:"score,omitempty"`
-	Keys         []string `json:"keys,omitempty"`
+	Score        int      `json:"score,omitempty"` //得分
+	Keys         []string `json:"keys,omitempty"`  //分词
 }
 
 type ResponseDocsSort []ResponseDoc
