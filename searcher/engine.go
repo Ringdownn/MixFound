@@ -51,3 +51,11 @@ func (e *Engine) Init() {
 	e.documentCount = -1
 	log.Print("chain num:")
 }
+
+func (e *Engine) GetOpions() *Option {
+	return &Option{
+		InvertedIndexName: "inverted_index",
+		PositiveIndexName: "positive_index",
+		DocIndexName:      "docs",
+	}
+}
