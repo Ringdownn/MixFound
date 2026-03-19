@@ -130,7 +130,7 @@ func Uint32ToByte(u uint32) []byte {
 	return b
 }
 
-func DeleteArray(arr []byte, index int) []byte {
+func DeleteArray(arr []uint32, index int) []uint32 {
 	return append(arr[:index], arr[index+1:]...)
 }
 

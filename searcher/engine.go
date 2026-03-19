@@ -1,6 +1,7 @@
 package searcher
 
 import (
+	"MixFound/searcher/arrays"
 	"MixFound/searcher/model"
 	"MixFound/searcher/storage"
 	"MixFound/searcher/utils"
@@ -169,19 +170,140 @@ func (e *Engine) AddDocument(index *model.IndexDoc) {
 	e.addPositiveIndex(index, splitWords)
 }
 
-//添加正排索引
-func (e *Engine) addPositiveIndex(word *model.IndexDoc, splitWords []string) {
+// 添加正排索引
+func (e *Engine) addPositiveIndex(index *model.IndexDoc, keys []string) {
+	e.Lock()
+	defer e.Unlock()
+
+	key := utils.Uint32ToByte(index.Id) //Id的字节表示，方便存储
+	shard := e.GetShard(index.Id)
+
+	//获取储存对象
+	docStorage := e.docStorages[shard]
+	positiveIndexStorage := e.positiveIndexStorages[shard]
+
+	//创建文档
+	doc := &model.StorageIndexDoc{
+		IndexDoc: index, //	原始文档
+		Keys:     keys,  //关键词列表
+	}
+
+	//存储Id（key）和文档的映射
+	docStorage.Set(key, utils.Encoder(doc))
+	//存储Id（key）和关键词的映射
+	positiveIndexStorage.Set(key, utils.Encoder(keys))
 
 }
 
-//添加倒排索引
+// 添加倒排索引
 func (e *Engine) addInvertedIndex(word string, id uint32) {
+	e.Lock()
+	defer e.Unlock()
 
+	shard := e.GetShardByWord(word)
+
+	//获取存储对象
+	s := e.invertedIndexStorages[shard]
+
+	//word作为key
+	key := []byte(word)
+
+	//如果存在，取出文档列表并放在ids中
+	buf, find := s.Get(key)
+	ids := make([]uint32, 0)
+	if find {
+		utils.Decoder(buf, &ids)
+	}
+
+	//若文档列表中不存在，添加到列表中
+	if !arrays.ArrayUint32Exists(ids, id) {
+		ids = append(ids, id)
+	}
+
+	s.Set(key, utils.Encoder(ids))
 }
 
-//检测是否需要更新
-func (e *Engine) optimizeIndex(id uint32, splitWords []string) ([]string, bool) {
+// 检测是否需要更新, 并移除删去的词
+func (e *Engine) optimizeIndex(id uint32, newWords []string) ([]string, bool) {
+	e.Lock()
+	defer e.Unlock()
 
+	//计算差值
+	removes, inserts, changed := e.getDifference(id, newWords)
+	if changed {
+		if removes != nil && len(removes) > 0 {
+			for _, word := range removes {
+				e.removeIdInWordIndex(id, word)
+			}
+		}
+	}
+	return inserts, changed
+}
+
+func (e *Engine) removeIdInWordIndex(id uint32, word string) {
+	e.Lock()
+	defer e.Unlock()
+
+	shard := e.GetShardByWord(word)
+	s := e.invertedIndexStorages[shard]
+
+	key := []byte(word)
+	buf, find := s.Get(key)
+	ids := make([]uint32, 0)
+	if find {
+		utils.Decoder(buf, &ids)
+
+		//移除对应的词
+		index := arrays.Find(ids, id)
+		if index != -1 {
+			ids = utils.DeleteArray(ids, index)
+			if len(ids) == 0 {
+				err := s.Delete(key)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				s.Set(key, utils.Encoder(ids))
+			}
+		}
+	}
+}
+
+// 计算差值
+// 返回的第一个数组为需要删除的词，第二个为需要添加的词，第三个为是否改变
+func (e *Engine) getDifference(id uint32, newWords []string) ([]string, []string, bool) {
+	shard := e.GetShard(id)
+	s := e.positiveIndexStorages[shard]
+	key := utils.Uint32ToByte(id)
+	buf, found := s.Get(key)
+	if found {
+		oldWords := make([]string, 0)
+		utils.Decoder(buf, &oldWords)
+
+		//计算需要移除的
+		remove := make([]string, 0)
+		for _, word := range oldWords {
+			if !arrays.ArrayStringExists(newWords, word) {
+				remove = append(remove, word)
+			}
+		}
+
+		//计算需要新增的
+		inserts := make([]string, 0)
+		for _, word := range newWords {
+			if !arrays.ArrayStringExists(oldWords, word) {
+				inserts = append(inserts, word)
+			}
+		}
+
+		if len(inserts) != 0 || len(remove) != 0 {
+			//存在变化
+			return inserts, remove, true
+		}
+		return inserts, remove, false
+	}
+	//id不存在，相当于新增
+	return nil, newWords, true
 }
 
 // Close 关闭引擎
