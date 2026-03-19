@@ -8,6 +8,7 @@ import (
 	"MixFound/searcher/storage"
 	"MixFound/searcher/utils"
 	"MixFound/searcher/words"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -392,7 +393,7 @@ func (e *Engine) MultiSearch(request *model.SearchRequest) (*model.SearchResult,
 
 // 通过Id获取文档并换填到响应
 func (e *Engine) getDocument(item model.SliceItem, doc *model.ResponseDoc, wg *sync.WaitGroup) {
-	buf := e.getDocById(item.Id)
+	buf := e.GetDocById(item.Id)
 	defer wg.Done()
 	doc.Score = item.Score
 
@@ -409,7 +410,7 @@ func (e *Engine) getDocument(item model.SliceItem, doc *model.ResponseDoc, wg *s
 	}
 }
 
-func (e *Engine) getDocById(id uint32) []byte {
+func (e *Engine) GetDocById(id uint32) []byte {
 	shard := e.GetShard(id)
 	s := e.docStorages[shard]
 	key := utils.Uint32ToByte(id)
@@ -436,6 +437,71 @@ func (e *Engine) processKeySearch(word string, fastSort *sorts.FastSort, wg *syn
 		fastSort.Add(&ids)
 	}
 
+}
+
+func (e *Engine) GetIndexCount() int64 {
+	var size int64
+	for i := 0; i < e.Shard; i++ {
+		size += e.invertedIndexStorages[i].GetCount()
+	}
+	return size
+}
+
+func (e *Engine) GetDocumentCount() int64 {
+	if e.documentCount == -1 {
+		var size int64
+		//多线程加速
+		wg := &sync.WaitGroup{}
+		wg.Add(e.Shard)
+		for i := 0; i < e.Shard; i++ {
+			go func(i int) {
+				size += e.docStorages[i].GetCount()
+				wg.Done()
+			}(i)
+		}
+		wg.Wait()
+		e.documentCount = size
+	}
+	return e.documentCount
+}
+
+// 根据Id移除索引remove
+func (e *Engine) RemoveIndex(id uint32) error {
+	e.Lock()
+	defer e.Unlock()
+
+	shard := e.GetShard(id)
+	key := utils.Uint32ToByte(id)
+
+	//通过正排索引拿到keys
+	ps := e.positiveIndexStorages[shard]
+	keysBuf, find := ps.Get(key)
+	if !find {
+		return errors.New(fmt.Sprintf("index not found: %d", id))
+	}
+
+	keys := make([]string, 0)
+	utils.Decoder(keysBuf, &keys)
+
+	//删除倒排索引中的文件ID
+	for _, word := range keys {
+		e.removeIdInWordIndex(id, word)
+	}
+
+	//删除正排索引
+	err := ps.Delete(key)
+	if err != nil {
+		return err
+	}
+
+	//删除文档
+	err = e.docStorages[shard].Delete(key)
+	if err != nil {
+		return err
+	}
+	//减少文档数量
+	e.documentCount--
+	return nil
 }
 
 // Close 关闭引擎
