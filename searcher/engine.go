@@ -3,6 +3,7 @@ package searcher
 import (
 	"MixFound/searcher/model"
 	"MixFound/searcher/storage"
+	"MixFound/searcher/utils"
 	"MixFound/searcher/words"
 	"fmt"
 	"log"
@@ -39,6 +40,8 @@ type Option struct {
 	PositiveIndexName string //正排索引路径
 	DocIndexName      string //文档路径
 }
+
+//初始化引擎
 
 // InitOption 初始化默认配置
 func (e *Engine) InitOption(option *Option) {
@@ -121,6 +124,24 @@ func (e *Engine) GetOptions() *Option {
 	}
 }
 
+func (e *Engine) getFilePath(filename string) string {
+	return e.IndexPath + string(os.PathSeparator) + filename
+}
+
+//计算分片逻辑
+
+// GetShard 计算分片
+func (e *Engine) GetShard(id uint32) int {
+	return int(id % uint32(e.Shard))
+}
+
+// GetShardByWord 通过string计算分片
+func (e *Engine) GetShardByWord(word string) int {
+	return int(utils.StringToInt(word) % uint32(e.Shard))
+}
+
+//文件处理流程
+
 // DocumentWorkerExec 添加文档队列
 func (e *Engine) DocumentWorkerExec(worker chan *model.IndexDoc) {
 	for {
@@ -129,10 +150,63 @@ func (e *Engine) DocumentWorkerExec(worker chan *model.IndexDoc) {
 	}
 }
 
-func (e *Engine) AddDocument(doc *model.IndexDoc) {
+// AddDocument 分词索引
+func (e *Engine) AddDocument(index *model.IndexDoc) {
+	e.Wait()
+	text := index.Text
+
+	splitWords := e.Tokenizer.Cut(text)
+
+	id := index.Id
+	//检测是否需要更新倒排索引，id不存在/索引不存在
+	inserts, needUpdateInverted := e.optimizeIndex(id, splitWords)
+	if needUpdateInverted {
+		for _, word := range inserts {
+			e.addInvertedIndex(word, id)
+		}
+	}
+
+	e.addPositiveIndex(index, splitWords)
+}
+
+//添加正排索引
+func (e *Engine) addPositiveIndex(word *model.IndexDoc, splitWords []string) {
 
 }
 
-func (e *Engine) getFilePath(filename string) string {
-	return e.IndexPath + string(os.PathSeparator) + filename
+//添加倒排索引
+func (e *Engine) addInvertedIndex(word string, id uint32) {
+
+}
+
+//检测是否需要更新
+func (e *Engine) optimizeIndex(id uint32, splitWords []string) ([]string, bool) {
+
+}
+
+// Close 关闭引擎
+func (e *Engine) Close() {
+	e.Lock()
+	defer e.Unlock()
+
+	for i := 0; i < e.Shard; i++ {
+		_ = e.docStorages[i].Close()
+		_ = e.invertedIndexStorages[i].Close()
+		_ = e.positiveIndexStorages[i].Close()
+	}
+}
+
+// Drop 删除文件
+func (e *Engine) Drop() error {
+	e.Lock()
+	defer e.Unlock()
+
+	if err := os.RemoveAll(e.IndexPath); err != nil {
+		return err
+	}
+
+	e.docStorages = make([]*storage.LevelDBStorage, 0)
+	e.invertedIndexStorages = make([]*storage.LevelDBStorage, 0)
+	e.positiveIndexStorages = make([]*storage.LevelDBStorage, 0)
+	return nil
 }

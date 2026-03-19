@@ -109,7 +109,7 @@ func Murmur3(key []byte) (hash uint32) {
 	return
 }
 
-func StringToHash(s string) uint32 {
+func StringToInt(s string) uint32 {
 	return Murmur3([]byte(s))
 }
 
