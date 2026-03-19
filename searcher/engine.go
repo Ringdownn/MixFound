@@ -3,6 +3,8 @@ package searcher
 import (
 	"MixFound/searcher/arrays"
 	"MixFound/searcher/model"
+	"MixFound/searcher/pagination"
+	"MixFound/searcher/sorts"
 	"MixFound/searcher/storage"
 	"MixFound/searcher/utils"
 	"MixFound/searcher/words"
@@ -304,6 +306,136 @@ func (e *Engine) getDifference(id uint32, newWords []string) ([]string, []string
 	}
 	//id不存在，相当于新增
 	return nil, newWords, true
+}
+
+// MultiSearch 多线程搜索
+func (e *Engine) MultiSearch(request *model.SearchRequest) (*model.SearchResult, error) {
+	//等待引擎初始化完成
+	e.Wait()
+
+	//分词
+	words := e.Tokenizer.Cut(request.Query)
+
+	//并行查询到排索引
+	fastSort := &sorts.FastSort{
+		IsDebug: e.IsDebug,
+		Order:   request.Order,
+	}
+
+	_time := utils.ExecTime(func() {
+		base := len(words)
+		wg := &sync.WaitGroup{}
+		wg.Add(base)
+
+		for _, word := range words {
+			go e.processKeySearch(word, fastSort, wg)
+		}
+		wg.Wait()
+	})
+
+	//处理分页
+	request = request.GetAndSetDefault()
+
+	//计算交集得分和去重
+	fastSort.Process()
+
+	wordMap := make(map[string]bool)
+	for _, word := range words {
+		wordMap[word] = true
+	}
+
+	var result = &model.SearchResult{
+		Total: fastSort.Count(),
+		Page:  request.Page,
+		Limit: request.Page,
+		Words: words,
+	}
+
+	//处理数据
+	t, err := utils.ExecTimeWithError(func() error {
+		pager := new(pagination.Pagination)
+		pager.Init(request.Page, fastSort.Count())
+		//设置总页数
+		result.PageCount = pager.PageCount
+
+		//读取单页的id
+		if pager.PageCount != 0 {
+			//TODO自定义分数表达式
+			//TODO分数表达式不为空，获取所有数据
+			//TODO根据自定义分数表达式计算排名
+
+			start, end := pager.GetPage(request.Page)
+
+			var resultItems = make([]model.SliceItem, 0)
+			fastSort.GetAll(&resultItems, start, end)
+
+			count := len(resultItems)
+
+			result.Documents = make([]model.ResponseDoc, count)
+			wg := &sync.WaitGroup{}
+			wg.Add(count)
+			for index, item := range resultItems {
+				go e.getDocument(item, &result.Documents[index], wg)
+			}
+			wg.Wait()
+		}
+		//无数据
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	result.Time = _time + t
+
+	return result, nil
+}
+
+// 通过Id获取文档并换填到响应
+func (e *Engine) getDocument(item model.SliceItem, doc *model.ResponseDoc, wg *sync.WaitGroup) {
+	buf := e.getDocById(item.Id)
+	defer wg.Done()
+	doc.Score = item.Score
+
+	if buf != nil {
+		//gob解析
+		storageDoc := new(model.StorageIndexDoc)
+		utils.Decoder(buf, &storageDoc)
+		//取出文档
+		doc.Document = storageDoc.Document
+		doc.Keys = storageDoc.Keys
+		doc.Text = storageDoc.Text
+		doc.Id = item.Id
+		// TODO关键词高亮
+	}
+}
+
+func (e *Engine) getDocById(id uint32) []byte {
+	shard := e.GetShard(id)
+	s := e.docStorages[shard]
+	key := utils.Uint32ToByte(id)
+
+	buf, find := s.Get(key)
+	if find {
+		return buf
+	}
+	return nil
+}
+
+// 通过倒排索引+词搜索文档，并加到fastSort的缓冲区
+func (e *Engine) processKeySearch(word string, fastSort *sorts.FastSort, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	shard := e.GetShardByWord(word)
+	s := e.invertedIndexStorages[shard]
+	key := []byte(word)
+
+	buf, find := s.Get(key)
+	if find {
+		ids := make([]uint32, 0)
+		utils.Decoder(buf, &ids)
+		fastSort.Add(&ids)
+	}
+
 }
 
 // Close 关闭引擎

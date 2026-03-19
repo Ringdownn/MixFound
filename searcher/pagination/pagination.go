@@ -4,13 +4,13 @@ import (
 	"math"
 )
 
-type pagination struct {
+type Pagination struct {
 	Limit     int
 	PageCount int
 	Total     int
 }
 
-func (p *pagination) init(limit int, total int) {
+func (p *Pagination) Init(limit int, total int) {
 	p.Limit = limit
 	p.Total = total
 
@@ -18,7 +18,7 @@ func (p *pagination) init(limit int, total int) {
 	p.PageCount = int(pageCount)
 }
 
-func (p *pagination) GetPage(page int) (int, int) {
+func (p *Pagination) GetPage(page int) (int, int) {
 	if page < 1 {
 		page = 1
 	}
