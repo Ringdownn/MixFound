@@ -154,6 +154,12 @@ func (e *Engine) DocumentWorkerExec(worker chan *model.IndexDoc) {
 	}
 }
 
+func (e *Engine) IndexDocument(document *model.IndexDoc) error {
+	e.documentCount++
+	e.addDocumentWorkerChan[e.GetShard(document.Id)] <- document
+	return nil
+}
+
 // AddDocument 分词索引
 func (e *Engine) AddDocument(index *model.IndexDoc) {
 	e.Wait()

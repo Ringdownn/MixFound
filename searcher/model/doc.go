@@ -20,6 +20,10 @@ type ResponseDoc struct {
 	Keys         []string `json:"keys,omitempty"`  //分词
 }
 
+type RemoveIndexModel struct {
+	Id uint32 `json:"id,omitempty"`
+}
+
 type ResponseDocsSort []ResponseDoc
 
 func (r ResponseDocsSort) Len() int {

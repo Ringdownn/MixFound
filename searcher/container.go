@@ -38,7 +38,7 @@ func (c *Container) Init() error {
 	//初始化数据库
 	for _, dir := range dirs {
 		if dir.IsDir() {
-			c.engines[dir.Name()] = c.getDataBase(dir.Name())
+			c.engines[dir.Name()] = c.GetDataBase(dir.Name())
 			log.Print("db:", dir.Name())
 		}
 	}
@@ -64,8 +64,8 @@ func (c *Container) NewEngine(name string) *Engine {
 	return engine
 }
 
-// 获取或创建引擎
-func (c *Container) getDataBase(name string) *Engine {
+// GetDataBase 获取或创建引擎
+func (c *Container) GetDataBase(name string) *Engine {
 	if name == "" {
 		name = "default"
 	}
