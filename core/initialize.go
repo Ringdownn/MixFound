@@ -9,7 +9,12 @@ import (
 
 func NewContainer(tokenizer *words.Tokenizer) *searcher.Container {
 	container := &searcher.Container{
-		//TODO初始参数
+		Dir:       global.CONFIG.Data,
+		Debug:     global.CONFIG.Debug,
+		Shard:     global.CONFIG.Shard,
+		Timeout:   global.CONFIG.Timeout,
+		BufferNum: global.CONFIG.BufferNum,
+		Tokenizer: tokenizer,
 	}
 	if err := container.Init(); err != nil {
 		panic(err)
