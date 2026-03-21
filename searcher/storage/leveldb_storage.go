@@ -56,12 +56,13 @@ func (s *LevelDBStorage) Close() error {
 		return nil
 	}
 	s.mu.Lock()
+	defer s.mu.Unlock()
 	err := s.db.Close()
 	if err != nil {
 		return err
 	}
 	s.closed = true
-	s.mu.Unlock()
+	//s.mu.Unlock()
 	return nil
 }
 
@@ -83,14 +84,17 @@ func (s *LevelDBStorage) ReOpen() {
 	if !s.isClosed() {
 		return
 	}
+
 	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	db, err := OpenDB(s.path)
 	if err != nil {
 		panic(err)
 	}
 	s.db = db
 	s.closed = false
-	s.mu.Unlock()
+	//s.mu.Unlock()
 	go s.compute()
 }
 

@@ -4,7 +4,17 @@ import (
 	"MixFound/global"
 	"MixFound/searcher"
 	"MixFound/searcher/words"
+	"MixFound/web/controller"
+	"MixFound/web/router"
+	"context"
+	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func NewContainer(tokenizer *words.Tokenizer) *searcher.Container {
@@ -42,8 +52,35 @@ func Initialize() {
 	//初始化容器
 	global.Container = NewContainer(tokenizer)
 
-	//TODO初始化业务逻辑
-	//TODO注册路由
-	//TODO启动服务
-	//TODO优雅关机
+	//初始化业务逻辑
+	controller.NewServices()
+
+	//注册路由
+	r := router.SetupRouter()
+
+	//启动服务
+	srv := &http.Server{
+		Addr:    global.CONFIG.Addr,
+		Handler: r,
+	}
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	//优雅关机
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Println("Server shutdown:", err)
+	}
+
+	log.Println("Server exiting")
 }

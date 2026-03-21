@@ -1,0 +1,49 @@
+=============== Mar 21, 2026 (CST) ===============
+16:10:28.194590 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:10:28.201210 db@open opening
+16:10:28.201559 version@stat F·[] S·0B[] Sc·[]
+16:10:28.204531 db@janitor F·2 G·0
+16:10:28.204624 db@open done T·3.385416ms
+=============== Mar 21, 2026 (CST) ===============
+16:14:14.715466 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:14:14.716326 version@stat F·[] S·0B[] Sc·[]
+16:14:14.716340 db@open opening
+16:14:14.716395 journal@recovery F·1
+16:14:14.716757 journal@recovery recovering @1
+16:14:14.721507 memdb@flush created L0@2 N·8 S·291B "北京,v6":"清华,v3"
+16:14:14.721676 version@stat F·[1] S·291B[291B] Sc·[0.25]
+16:14:14.736034 db@janitor F·3 G·0
+16:14:14.736059 db@open done T·19.711ms
+16:22:42.314677 memdb@flush N·5464 S·3MiB
+16:22:42.336365 memdb@flush created L0@6 N·5464 S·1MiB "北京,v5473":"清华,v20"
+16:22:42.336416 version@stat F·[2] S·1MiB[1MiB] Sc·[0.50]
+16:22:42.342430 memdb@flush committed F·1 T·27.693833ms
+16:22:42.343304 journal@remove removed @3
+16:23:24.690497 memdb@flush N·4432 S·3MiB
+16:23:24.701288 memdb@flush created L0@8 N·4432 S·1MiB "北京,v9901":"清华,v5475"
+16:23:24.701341 version@stat F·[3] S·2MiB[2MiB] Sc·[0.75]
+16:23:24.705316 memdb@flush committed F·1 T·14.782416ms
+16:23:24.705714 journal@remove removed @5
+16:24:09.224245 memdb@flush N·4461 S·3MiB
+16:24:09.244924 memdb@flush created L0@10 N·4461 S·1MiB "北京,v14364":"清华,v9910"
+16:24:09.244984 version@stat F·[4] S·3MiB[3MiB] Sc·[1.00]
+16:24:09.247935 memdb@flush committed F·1 T·23.6295ms
+16:24:09.248758 journal@remove removed @7
+16:24:09.248803 table@compaction L0·4 -> L1·0 S·3MiB Q·14368
+16:24:09.263806 table@build created L1@11 N·3 S·2KiB "北京,v14364":"清华,v14365"
+16:24:09.263849 version@stat F·[0 1] S·2KiB[0B 2KiB] Sc·[0.00 0.00]
+16:24:09.267810 table@compaction committed F-3 S-3MiB Ke·0 D·14362 T·18.992792ms
+16:24:09.267966 table@remove removed @10
+16:24:09.268057 table@remove removed @8
+16:24:09.268152 table@remove removed @6
+16:24:09.268349 table@remove removed @2
+=============== Mar 21, 2026 (CST) ===============
+16:31:23.120406 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:31:23.121093 version@stat F·[0 1] S·2KiB[0B 2KiB] Sc·[0.00 0.00]
+16:31:23.121105 db@open opening
+16:31:23.121167 journal@recovery F·1
+16:31:23.121233 journal@recovery recovering @9
+16:31:23.144411 memdb@flush created L0@12 N·3030 S·812KiB "北京,v17392":"清华,v14367"
+16:31:23.144717 version@stat F·[1 1] S·815KiB[812KiB 2KiB] Sc·[0.25 0.00]
+16:31:23.156867 db@janitor F·4 G·0
+16:31:23.156918 db@open done T·35.803208ms

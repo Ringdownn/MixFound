@@ -2,6 +2,7 @@ package sorts
 
 import (
 	"MixFound/searcher/model"
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -64,6 +65,9 @@ type FastSort struct {
 
 // Add 往临时切片中添加文档ID列表
 func (f *FastSort) Add(ids *[]uint32) {
+	f.Lock()
+	defer f.Unlock()
+
 	f.temps = append(f.temps, *ids...)
 }
 
@@ -71,12 +75,14 @@ func (f *FastSort) Add(ids *[]uint32) {
 func (f *FastSort) find(target *uint32) (bool, int) {
 	l := 0
 	r := f.count - 1
-	for l < r {
-		mid := (l + r) >> 2
+	//fmt.Println("find", *target, "start", f.count)
+	for l <= r {
+		mid := (l + r) >> 1
+		//fmt.Println("finding", mid, l, r)
 		if f.data[mid].Id == *target {
 			return true, mid
 		}
-		if f.data[mid].Id > *target {
+		if f.data[mid].Id < *target {
 			r = mid - 1
 		} else {
 			l = mid + 1
@@ -105,11 +111,13 @@ func (f *FastSort) Process() {
 	for _, temp := range f.temps {
 		if found, index := f.find(&temp); found {
 			f.data[index].Score += 1 //计算重复得分
+			fmt.Println("yes")
 		} else {
 			f.data = append(f.data, model.SliceItem{
 				Id:    temp,
 				Score: 1,
 			})
+			sort.Sort(sort.Reverse(ScoreSlice(f.data)))
 			f.count++
 		}
 	}

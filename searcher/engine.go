@@ -239,9 +239,12 @@ func (e *Engine) optimizeIndex(id uint32, newWords []string) ([]string, bool) {
 
 	//计算差值
 	removes, inserts, changed := e.getDifference(id, newWords)
+	//println(removes, inserts, changed)
 	if changed {
+		//println(removes)
 		if removes != nil && len(removes) > 0 {
 			for _, word := range removes {
+				//println(word)
 				e.removeIdInWordIndex(id, word)
 			}
 		}
@@ -250,9 +253,6 @@ func (e *Engine) optimizeIndex(id uint32, newWords []string) ([]string, bool) {
 }
 
 func (e *Engine) removeIdInWordIndex(id uint32, word string) {
-	e.Lock()
-	defer e.Unlock()
-
 	shard := e.GetShardByWord(word)
 	s := e.invertedIndexStorages[shard]
 
@@ -307,9 +307,9 @@ func (e *Engine) getDifference(id uint32, newWords []string) ([]string, []string
 
 		if len(inserts) != 0 || len(remove) != 0 {
 			//存在变化
-			return inserts, remove, true
+			return remove, inserts, true
 		}
-		return inserts, remove, false
+		return remove, inserts, false
 	}
 	//id不存在，相当于新增
 	return nil, newWords, true
@@ -354,14 +354,14 @@ func (e *Engine) MultiSearch(request *model.SearchRequest) (*model.SearchResult,
 	var result = &model.SearchResult{
 		Total: fastSort.Count(),
 		Page:  request.Page,
-		Limit: request.Page,
+		Limit: request.Limit,
 		Words: words,
 	}
 
 	//处理数据
 	t, err := utils.ExecTimeWithError(func() error {
 		pager := new(pagination.Pagination)
-		pager.Init(request.Page, fastSort.Count())
+		pager.Init(request.Limit, fastSort.Count())
 		//设置总页数
 		result.PageCount = pager.PageCount
 

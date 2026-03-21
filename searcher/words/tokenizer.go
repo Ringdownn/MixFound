@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	//go:embed data/*.txt
 	dictionaryFS embed.FS
 )
 

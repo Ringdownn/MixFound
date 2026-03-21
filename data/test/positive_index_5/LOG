@@ -1,0 +1,16 @@
+=============== Mar 21, 2026 (CST) ===============
+16:10:32.302716 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:10:32.309418 db@open opening
+16:10:32.311317 version@stat F·[] S·0B[] Sc·[]
+16:10:32.317600 db@janitor F·2 G·0
+16:10:32.317661 db@open done T·8.204042ms
+=============== Mar 21, 2026 (CST) ===============
+16:21:46.138476 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:21:46.139315 version@stat F·[] S·0B[] Sc·[]
+16:21:46.139337 db@open opening
+16:21:46.139443 journal@recovery F·1
+16:21:46.139542 journal@recovery recovering @1
+16:21:46.144651 memdb@flush created L0@2 N·1 S·209B "\x05\x00\x00\x00,v1":"\x05\x00\x00\x00,v1"
+16:21:46.144916 version@stat F·[1] S·209B[209B] Sc·[0.25]
+16:21:46.156877 db@janitor F·3 G·0
+16:21:46.156929 db@open done T·17.57775ms

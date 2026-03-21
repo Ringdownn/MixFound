@@ -1,0 +1,16 @@
+=============== Mar 21, 2026 (CST) ===============
+16:10:32.388976 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:10:32.398541 db@open opening
+16:10:32.399099 version@stat F·[] S·0B[] Sc·[]
+16:10:32.407710 db@janitor F·2 G·0
+16:10:32.407775 db@open done T·9.15775ms
+=============== Mar 21, 2026 (CST) ===============
+16:21:46.194513 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:21:46.195592 version@stat F·[] S·0B[] Sc·[]
+16:21:46.195614 db@open opening
+16:21:46.195674 journal@recovery F·1
+16:21:46.195715 journal@recovery recovering @1
+16:21:46.199679 memdb@flush created L0@2 N·1 S·198B "华大,v1":"华大,v1"
+16:21:46.200079 version@stat F·[1] S·198B[198B] Sc·[0.25]
+16:21:46.211357 db@janitor F·3 G·0
+16:21:46.211402 db@open done T·15.778708ms
