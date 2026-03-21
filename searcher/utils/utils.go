@@ -144,6 +144,12 @@ func RemoveSpace(s string) string {
 	return reg.ReplaceAllString(s, "")
 }
 
+func RemoveEnglish(str string) string {
+	// 去除 a-z 和 A-Z 的字符
+	reg := regexp.MustCompile(`[a-zA-Z]+`)
+	return reg.ReplaceAllString(str, "")
+}
+
 // DirSize 计算占用磁盘空间大小
 func DirSize(path string) int64 {
 	var size int64

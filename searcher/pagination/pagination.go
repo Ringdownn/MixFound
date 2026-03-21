@@ -19,23 +19,21 @@ func (p *Pagination) Init(limit int, total int) {
 }
 
 func (p *Pagination) GetPage(page int) (int, int) {
+	if page < 1 {
+		page = 1
+	}
 	if page > p.PageCount {
 		page = p.PageCount
 	}
-	if page < 0 {
-		page = 1
-	}
 
-	page -= 1
-
-	start := page * p.Limit
+	start := (page - 1) * p.Limit
 	end := start + p.Limit
 
-	if start > p.Total {
-		return 0, p.Total - 1
-	}
 	if end > p.Total {
 		end = p.Total
+	}
+	if start > p.PageCount {
+		return 0, p.Total - 1
 	}
 	return start, end
 }

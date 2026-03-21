@@ -3,6 +3,8 @@ package words
 import (
 	"MixFound/searcher/utils"
 	"embed"
+	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/wangbin/jiebago"
@@ -34,16 +36,32 @@ func NewTokenizer(dictionaryPath string) *Tokenizer {
 func (t *Tokenizer) Cut(text string) []string {
 	//全部小写
 	text = strings.ToLower(text)
-	//去除空格
-	text = utils.RemoveSpace(text)
 	//去除标点符号
 	text = utils.RemovePunctuation(text)
 
+	fmt.Println(text)
+	//提取英文单词
 	var wordsMap = make(map[string]struct{})
+	var wordsSlice []string
+
+	englishWords := extractEnglishWords(text)
+	fmt.Println(englishWords)
+	for _, word := range englishWords {
+		_, find := wordsMap[word]
+		if !find {
+			wordsSlice = append(wordsSlice, word)
+			wordsMap[word] = struct{}{}
+		}
+	}
+
+	//去除英文
+	text = utils.RemoveEnglish(text)
+
+	//去除空格
+	text = utils.RemoveSpace(text)
 
 	//开启分词，返回一个channel
 	resultChan := t.seg.CutForSearch(text, true)
-	var wordsSlice []string
 	for {
 		//从channel中取出词
 		w, ok := <-resultChan
@@ -59,4 +77,9 @@ func (t *Tokenizer) Cut(text string) []string {
 
 	}
 	return wordsSlice
+}
+
+func extractEnglishWords(text string) []string {
+	reg := regexp.MustCompile("[a-zA-Z]+")
+	return reg.FindAllString(text, -1)
 }

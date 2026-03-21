@@ -14,3 +14,22 @@
 16:21:46.200079 version@stat F·[1] S·198B[198B] Sc·[0.25]
 16:21:46.211357 db@janitor F·3 G·0
 16:21:46.211402 db@open done T·15.778708ms
+=============== Mar 21, 2026 (CST) ===============
+20:06:35.109177 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+20:06:35.111194 version@stat F·[1] S·198B[198B] Sc·[0.25]
+20:06:35.114174 db@open opening
+20:06:35.114356 journal@recovery F·1
+20:06:35.114424 journal@recovery recovering @3
+20:06:35.158261 memdb@flush created L0@5 N·5160 S·752KiB "华大,v5162":"华大,v3"
+20:06:35.158506 version@stat F·[2] S·752KiB[752KiB] Sc·[0.50]
+20:06:35.170890 db@janitor F·4 G·0
+20:06:35.170957 db@open done T·56.764875ms
+=============== Mar 21, 2026 (CST) ===============
+20:10:08.803746 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+20:10:08.804557 version@stat F·[2] S·752KiB[752KiB] Sc·[0.50]
+20:10:08.804563 db@open opening
+20:10:08.804601 journal@recovery F·1
+20:10:08.804990 journal@recovery recovering @6
+20:10:08.809615 version@stat F·[2] S·752KiB[752KiB] Sc·[0.50]
+20:10:08.837059 db@janitor F·4 G·0
+20:10:08.837077 db@open done T·32.511292ms
