@@ -56,3 +56,40 @@
 20:10:32.545076 version@stat F·[1 1] S·815KiB[812KiB 2KiB] Sc·[0.25 0.00]
 20:10:32.556529 db@janitor F·4 G·0
 20:10:32.556565 db@open done T·11.766667ms
+=============== Mar 23, 2026 (CST) ===============
+00:45:10.472650 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+00:45:10.473916 version@stat F·[1 1] S·815KiB[812KiB 2KiB] Sc·[0.25 0.00]
+00:45:10.475021 db@open opening
+00:45:10.475224 journal@recovery F·1
+00:45:10.476068 journal@recovery recovering @15
+00:45:10.489943 memdb@flush created L0@17 N·1 S·1KiB "北京,v17398":"北京,v17398"
+00:45:10.492073 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:45:10.515447 db@janitor F·5 G·0
+00:45:10.515524 db@open done T·40.473042ms
+=============== Mar 23, 2026 (CST) ===============
+00:46:14.639738 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+00:46:14.640962 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:46:14.641007 db@open opening
+00:46:14.641169 journal@recovery F·1
+00:46:14.641987 journal@recovery recovering @18
+00:46:14.651277 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:46:14.687217 db@janitor F·5 G·0
+00:46:14.687352 db@open done T·46.312042ms
+=============== Mar 23, 2026 (CST) ===============
+00:47:38.027736 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+00:47:38.028889 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:47:38.028924 db@open opening
+00:47:38.029070 journal@recovery F·1
+00:47:38.030370 journal@recovery recovering @20
+00:47:38.030965 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:47:38.053373 db@janitor F·5 G·0
+00:47:38.056926 db@open done T·27.979792ms
+=============== Mar 23, 2026 (CST) ===============
+00:47:55.028341 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+00:47:55.028781 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:47:55.028788 db@open opening
+00:47:55.028819 journal@recovery F·1
+00:47:55.030501 journal@recovery recovering @22
+00:47:55.033644 version@stat F·[2 1] S·816KiB[814KiB 2KiB] Sc·[0.50 0.00]
+00:47:55.076171 db@janitor F·5 G·0
+00:47:55.080736 db@open done T·51.936042ms

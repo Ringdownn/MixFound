@@ -2,7 +2,6 @@ package sorts
 
 import (
 	"MixFound/searcher/model"
-	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -111,7 +110,6 @@ func (f *FastSort) Process() {
 	for _, temp := range f.temps {
 		if found, index := f.find(&temp); found {
 			f.data[index].Score += 1 //计算重复得分
-			fmt.Println("yes")
 		} else {
 			f.data = append(f.data, model.SliceItem{
 				Id:    temp,

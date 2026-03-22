@@ -207,3 +207,8 @@ func ReleaseAssets(file fs.File, out string) {
 		}
 	}
 }
+
+func ExtractEnglishWords(text string) []string {
+	reg := regexp.MustCompile("[a-zA-Z]+")
+	return reg.FindAllString(text, -1)
+}

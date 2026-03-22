@@ -321,7 +321,7 @@ func (e *Engine) MultiSearch(request *model.SearchRequest) (*model.SearchResult,
 	e.Wait()
 
 	//分词
-	words := e.Tokenizer.Cut(request.Query)
+	words := e.Tokenizer.CutWithTranslate(request.Query)
 
 	//并行查询到排索引
 	fastSort := &sorts.FastSort{
