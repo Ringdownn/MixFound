@@ -1,0 +1,33 @@
+from fastapi import APIRouter, HTTPException, Depends
+
+from ai_tagging.app.schemas.request import TagResponse, TagRequest
+from ai_tagging.app.services.tagging import TaggingService
+
+router = APIRouter()
+
+_tagging_service: TaggingService = None
+
+async def get_tagging_service() -> TaggingService:
+    return _tagging_service
+
+def init_tagging_service(service: TaggingService):
+    global _tagging_service
+    _tagging_service = service
+
+@router.post("/api/tag", response_model=TagResponse)
+async def tag_image(
+        request: TagRequest,
+        service: TaggingService = Depends(get_tagging_service)
+):
+    result = await service.tag_image_from_url(request.image_url, request.top_k)
+    if not result:
+        raise HTTPException(status_code=400, detail="Failed to tag image")
+    return TagResponse(
+        tags=[r.to_dict() for r in result],
+        image_url=request.image_url,
+        top_k=len(result),
+    )
+
+@router.get("/health")
+async def health_check():
+    return {"status": "healthy"}
