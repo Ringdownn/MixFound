@@ -1,4 +1,4 @@
-import Optional
+from typing import Optional
 
 from ai_tagging.app.models.clip_model import CLIPService
 
