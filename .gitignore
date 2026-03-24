@@ -17,7 +17,7 @@ ENV/
 *.model
 *.h5
 *.pb
-models/
+ai_tagging/models/
 checkpoints/
 
 # IDE
