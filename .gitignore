@@ -1,2 +1,36 @@
-/data/*
-/ai_tagging/models/*
+/data/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Models
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.model
+*.h5
+*.pb
+models/
+checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+*.egg-info/
