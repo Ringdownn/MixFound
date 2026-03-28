@@ -34,3 +34,4 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+ai_tagging/models/clip-vit-base-patch32/model.safetensors
