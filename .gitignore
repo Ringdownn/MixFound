@@ -1,4 +1,5 @@
 /data/
+
 # Python
 __pycache__/
 *.pyc
@@ -18,6 +19,7 @@ ENV/
 *.h5
 *.pb
 ai_tagging/models/
+services/ai-tagging/models/
 checkpoints/
 
 # IDE
@@ -35,3 +37,22 @@ dist/
 build/
 *.egg-info/
 ai_tagging/models/clip-vit-base-patch32/model.safetensors
+services/ai-tagging/models/clip-vit-base-patch32/model.safetensors
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Docker
+*.log
+
+# 临时文件
+tmp/
+temp/
+*.tmp

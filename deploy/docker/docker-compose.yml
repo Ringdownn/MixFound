@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # 搜索引擎服务
+  search-engine:
+    build:
+      context: ../../services/search-engine
+      dockerfile: Dockerfile
+    container_name: mixfound-search-engine
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    volumes:
+      - ../../data/search-engine:/app/data
+    networks:
+      - mixfound-network
+
+  # AI打标服务
+  ai-tagging:
+    build:
+      context: ../../services/ai-tagging
+      dockerfile: Dockerfile
+    container_name: mixfound-ai-tagging
+    ports:
+      - "8081:8080"
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    volumes:
+      - ../../data/ai-tagging:/app/data
+    networks:
+      - mixfound-network
+
+  # Redis服务
+  redis:
+    image: redis:7-alpine
+    container_name: mixfound-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - mixfound-network
+
+  # RabbitMQ服务
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mixfound-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP端口
+      - "15672:15672" # 管理界面端口
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - mixfound-network
+
+# 数据卷
+volumes:
+  redis-data:
+  rabbitmq-data:
+
+# 网络
+networks:
+  mixfound-network:
+    driver: bridge
