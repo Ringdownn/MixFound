@@ -2,7 +2,7 @@ package translator
 
 import (
 	"MixFound/redis"
-	"fmt"
+	"strings"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -15,6 +15,7 @@ func TranslateWordsToEn(words []string) []string {
 	var result []string
 	for _, word := range words {
 		translated := translateWordToEn(word)
+		translated = strings.ToLower(translated)
 		result = append(result, translated)
 	}
 	return result
@@ -37,7 +38,7 @@ func translateWordToEn(word string) string {
 	}
 
 	translated := CallTranslationAPIToEn(word)
-	fmt.Println(translated)
+	//fmt.Println(translated)
 
 	if translated != "" && translated != word {
 		//	fmt.Println(translated, word)
@@ -77,6 +78,7 @@ func translateWordToCn(word string) string {
 	}
 
 	translated := CallTranslationAPIToCn(word)
+	//fmt.Println(translated)
 
 	if translated != "" && translated != word {
 		//fmt.Println(translated, word)

@@ -167,6 +167,11 @@ func (e *Engine) AddDocument(index *model.IndexDoc) {
 
 	splitWords := e.Tokenizer.Cut(text)
 
+	//如果有图片打标后到标签，将标签加入分词结果
+	if len(index.Tags) > 0 {
+		splitWords = append(splitWords, index.Tags...)
+	}
+
 	id := index.Id
 	//检测是否需要更新倒排索引，id不存在/索引不存在
 	inserts, needUpdateInverted := e.optimizeIndex(id, splitWords)

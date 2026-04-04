@@ -4,6 +4,8 @@ package model
 type IndexDoc struct {
 	Id       uint32                 `json:"id,omitempty"`
 	Text     string                 `json:"text,omitempty"`
+	ImageURL string                 `json:"imageURL,omitempty"`
+	Tags     []string               `json:"tags,omitempty"`
 	Document map[string]interface{} `json:"document,omitempty"`
 }
 

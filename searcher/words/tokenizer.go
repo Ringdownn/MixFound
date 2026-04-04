@@ -123,6 +123,7 @@ func (t *Tokenizer) CutWithTranslate(text string) []string {
 	//放入翻译后的单词
 	translatedWords := translator.TranslateWordsToEn(chineseWordSlice)
 	translatedWords = append(translatedWords, translator.TranslateWordsToCn(englishWords)...)
+	//fmt.Print(translatedWords)
 
 	for _, word := range translatedWords {
 		_, find := wordsMap[word]
