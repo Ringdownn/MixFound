@@ -1,6 +1,10 @@
 package controller
 
-import "MixFound/services/search-engine/internal/web/service"
+import (
+	"MixFound/services/search-engine/internal/queue/producer"
+	"MixFound/services/search-engine/internal/web/service"
+	"log"
+)
 
 var srv *Services
 
@@ -10,10 +14,19 @@ type Services struct {
 	Index    *service.Index
 }
 
-func NewServices() {
+// NewServices 初始化所有服务，注入依赖
+func NewServices(taggingProducer *producer.TaggingProducer) {
 	srv = &Services{
 		Base:     service.NewBase(),
 		Database: service.NewDatabase(),
-		Index:    service.NewIndex(),
+		Index:    service.NewIndex(taggingProducer),
 	}
+}
+
+// GetServices 获取服务实例
+func GetServices() *Services {
+	if srv == nil {
+		log.Fatal("Services not initialized")
+	}
+	return srv
 }

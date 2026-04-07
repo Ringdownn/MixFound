@@ -1,8 +1,8 @@
 package main
 
 import (
+	"MixFound/services/search-engine/internal/searcher/translator"
 	"fmt"
-	"MixFound/searcher/translator"
 )
 
 func main() {

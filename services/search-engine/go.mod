@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/redis/go-redis/v9 v9.18.0
+	github.com/streadway/amqp v1.1.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/wangbin/jiebago v0.3.2
 	gopkg.in/yaml.v2 v2.2.8

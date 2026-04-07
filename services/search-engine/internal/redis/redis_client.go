@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"log"
 	"os"
 	"sync"
 
@@ -70,13 +71,20 @@ func InitRedisClient() {
 			Password: redisConfig.RedisPass,
 			DB:       redisConfig.RedisDB,
 		})
+
+		// 测试连接
+		if err := Rdb.Ping(Ctx).Err(); err != nil {
+			log.Fatalf("Failed to connect to Redis: %v", err)
+		}
+
+		log.Println("Redis connected successfully")
 	})
 }
 
 func Close() {
 	if Rdb != nil {
 		if err := Rdb.Close(); err != nil {
-			panic(err)
+			log.Printf("Error closing Redis: %v", err)
 		}
 	}
 }
