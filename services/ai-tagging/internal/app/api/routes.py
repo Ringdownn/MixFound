@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from ai_tagging.app.schemas.request import TagResponse, TagRequest
-from ai_tagging.app.services.tagging import TaggingService
+from internal.app.schemas.request import TagResponse, TagRequest
+from internal.app.services.tagging import TaggingService
 
 router = APIRouter()
 

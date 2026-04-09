@@ -5,8 +5,7 @@ import (
 	"MixFound/services/search-engine/internal/queue/producer"
 	"MixFound/services/search-engine/internal/searcher"
 	"MixFound/services/search-engine/internal/searcher/model"
-	"fmt"
-	"strconv"
+	"log"
 )
 
 type Index struct {
@@ -25,10 +24,9 @@ func NewIndex(taggingProducer *producer.TaggingProducer) *Index {
 func (index *Index) AddIndex(dbName string, doc *model.IndexDoc) error {
 	if doc.ImageURL != "" {
 		if err := index.taggingProducer.PublishTaggingTask(dbName, doc); err != nil {
-			fmt.Print("发送到打标队列失败" + strconv.Itoa(int(doc.Id)))
+			log.Printf("发送到打标队列失败,docId: %d, error: %v", doc.Id, err)
 			return index.Container.GetDataBase(dbName).IndexDocument(doc)
 		}
-		return nil
 	}
 	return index.Container.GetDataBase(dbName).IndexDocument(doc)
 }
@@ -43,19 +41,46 @@ func (index *Index) RemoveIndex(dbName string, doc *model.RemoveIndexModel) erro
 
 func (index *Index) BatchAddIndex(dbName string, docs []*model.IndexDoc) error {
 	c := index.Container.GetDataBase(dbName)
+	var failedDocs []struct {
+		Doc   *model.IndexDoc
+		Error error
+	}
+
 	for _, doc := range docs {
+		var err error
 		if doc.ImageURL != "" {
-			if err := index.taggingProducer.PublishTaggingTask(dbName, doc); err != nil {
-				fmt.Print("发送到打标队列失败" + strconv.Itoa(int(doc.Id)))
-				if err := c.IndexDocument(doc); err != nil {
-					return err
-				}
+			err = index.taggingProducer.PublishTaggingTask(dbName, doc)
+			if err != nil {
+				log.Printf("发送到打标队列失败, docId: %d, error: %v", doc.Id, err)
+				failedDocs = append(failedDocs, struct {
+					Doc   *model.IndexDoc
+					Error error
+				}{doc, err})
+				continue
 			}
-			continue
-		}
-		if err := c.IndexDocument(doc); err != nil {
-			return err
+			err = c.IndexDocument(doc)
+			if err != nil {
+				failedDocs = append(failedDocs, struct {
+					Doc   *model.IndexDoc
+					Error error
+				}{doc, err})
+				continue
+			}
+		} else {
+			err = c.IndexDocument(doc)
+			if err != nil {
+				failedDocs = append(failedDocs, struct {
+					Doc   *model.IndexDoc
+					Error error
+				}{doc, err})
+				continue
+			}
 		}
 	}
+
+	if len(failedDocs) > 0 {
+		log.Printf("BatchAddIndex: %d/%d 文档处理失败", len(failedDocs), len(docs))
+	}
+
 	return nil
 }

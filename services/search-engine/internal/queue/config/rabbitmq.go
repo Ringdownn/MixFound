@@ -1,5 +1,7 @@
 package config
 
+import "os"
+
 type RabbitMQConfig struct {
 	Host     string
 	Port     int
@@ -21,7 +23,7 @@ type RabbitMQConfig struct {
 }
 
 var Config = RabbitMQConfig{
-	Host:     "localhost",
+	Host:     getEnv("RABBITMQ_HOST", "localhost"),
 	Port:     5672,
 	User:     "guest",
 	Password: "guest",
@@ -35,4 +37,11 @@ var Config = RabbitMQConfig{
 
 	TaggingKey: "tagging.task",
 	IndexKey:   "index.update",
+}
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }

@@ -1,7 +1,10 @@
 # 构建阶段
-FROM golang:1.21-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
+
+# 设置国内 Go 模块镜像源
+ENV GOPROXY=https://goproxy.cn,direct
 
 # 复制 go.mod 和 go.sum
 COPY go.mod go.sum ./
@@ -20,8 +23,9 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-# 从构建阶段复制可执行文件
+# 从构建阶段复制可执行文件和配置文件
 COPY --from=builder /app/main .
+COPY --from=builder /app/config.yaml .
 
 # 暴露端口
 EXPOSE 8080

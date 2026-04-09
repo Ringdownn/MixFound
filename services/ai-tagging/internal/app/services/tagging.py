@@ -5,9 +5,9 @@ import logging
 
 import numpy as np
 
-from ai_tagging.app.config import settings
-from ai_tagging.app.models.clip_model import CLIPService
-from ai_tagging.app.services.image_loader import ImageLoader
+from internal.app.config import settings
+from internal.app.models.clip_model import CLIPService
+from internal.app.services.image_loader import ImageLoader
 
 logger = logging.getLogger(__name__)
 

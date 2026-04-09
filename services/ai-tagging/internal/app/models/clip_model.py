@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import numpy as np
 from transformers import CLIPModel, CLIPProcessor
 from PIL import Image
-from ai_tagging.app.config import settings
+from internal.app.config import settings
 
 
 class CLIPService:

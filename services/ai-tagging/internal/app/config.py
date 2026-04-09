@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 本地模型路径
-LOCAL_MODEL_PATH = os.path.join(BASE_DIR, "ai_tagging", "models", "clip-vit-base-patch32")
+LOCAL_MODEL_PATH = os.path.join(BASE_DIR, "data", "models", "clip-vit-base-patch32")
 
 def get_device() -> str:
     if torch.cuda.is_available():
@@ -19,7 +19,7 @@ def get_device() -> str:
 
 class Settings(BaseSettings):
     MODEL_NAME: str = LOCAL_MODEL_PATH if os.path.exists(LOCAL_MODEL_PATH) else "openai/clip-vit-base-patch32"
-    LABEL_FILE: str = os.path.join(BASE_DIR, "ai_tagging", "data", "labels.json")
+    LABEL_FILE: str = os.path.join(BASE_DIR, "data", "labels.json")
     DEFAULT_TOP_K: int = 3
     MAX_IMAGE_SIZE: int = 512
     DEVICE: str = get_device()
